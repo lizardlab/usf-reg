@@ -15,14 +15,13 @@ import usf_reg
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)-6s %(message)s')
 
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0'}
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'}
 
 def check_diff(url, crns):
     opened = []
     session = requests.session()
     for crn in crns: # change P_SEMESTER to match the semester your searching for classes
-        data = {"P_SEMESTER": "201901","P_SESSION": "","P_CAMPUS": "","P_DIST": "","P_COL": "","P_DEPT": "","p_status": "", "p_ssts_code": "","P_CRSE_LEVL": "","P_REF": crn,"P_SUBJ": "","P_NUM": "","P_TITLE": "","P_CR": "","p_day_x": "no_val","p_day": "no_val", "P_TIME1": "","P_INSTRUCTOR": "","P_UGR": ""}
-        #session.get("http://www.registrar.usf.edu/ssearch/staff/staff.php", headers=headers)
+        data = {"P_SEMESTER": "202108","P_SESSION": "","P_CAMPUS": "","P_DIST": "","P_COL": "","P_DEPT": "","p_status": "", "p_ssts_code": "","P_CRSE_LEVL": "","P_REF": crn,"P_SUBJ": "","P_NUM": "","P_TITLE": "","P_CR": "","p_day_x": "no_val","p_day": "no_val", "P_TIME1": "","P_INSTRUCTOR": "","P_UGR": ""}
         site = session.post(url, headers=headers, data=data)
         soup = BeautifulSoup(site.content, "lxml")
         course = soup.table
@@ -38,4 +37,4 @@ def check_diff(url, crns):
         logging.debug("Classes ready to submit")
         usf_reg.register(opened)
 
-check_diff('https://usfonline.admin.usf.edu/pls/prodss/wp_staff_search_db', ["12345", "23456", "34567"]) # Input the CRNs of interest here
+check_diff('https://usfweb.usf.edu/DSS/StaffScheduleSearch/StaffSearch/Results', ["12345", "23456", "34567"]) # Input the CRNs of interest here
