@@ -11,30 +11,37 @@ Copyright 2019 (c) Logan Lopez
 import requests
 import logging
 from bs4 import BeautifulSoup
-import usf_reg
+from win10toast import ToastNotifier
+import time
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)-6s %(message)s')
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'}
 
 def check_diff(url, crns):
-    opened = []
-    session = requests.session()
-    for crn in crns: # change P_SEMESTER to match the semester your searching for classes
-        data = {"P_SEMESTER": "202108","P_SESSION": "","P_CAMPUS": "","P_DIST": "","P_COL": "","P_DEPT": "","p_status": "", "p_ssts_code": "","P_CRSE_LEVL": "","P_REF": crn,"P_SUBJ": "","P_NUM": "","P_TITLE": "","P_CR": "","p_day_x": "no_val","p_day": "no_val", "P_TIME1": "","P_INSTRUCTOR": "","P_UGR": ""}
-        site = session.post(url, headers=headers, data=data)
-        soup = BeautifulSoup(site.content, "lxml")
-        course = soup.table
-        courseTable = course.table
-        rows = courseTable.find_all('td')
-        results = [i.text for i in rows]
-        if results[10] == "Closed":
-            logging.debug("Class unavailable: "+ results[7])
-        else:
-            opened.append(crn)
-            logging.debug("Class available: " + results[7])
-    if len(opened) > 0:
-        logging.debug("Classes ready to submit")
-        usf_reg.register(opened)
+    notAvail = True
+    while(notAvail):
+        opened = []
+        session = requests.session()
+        for crn in crns: # change P_SEMESTER to match the semester your searching for classes
+            data = {"P_SEMESTER": "202201","P_SESSION": "","P_CAMPUS": "","P_DIST": "","P_COL": "","P_DEPT": "","p_status": "", "p_ssts_code": "","P_CRSE_LEVL": "","P_REF": crn,"P_SUBJ": "","P_NUM": "","P_TITLE": "","P_CR": "","p_day_x": "no_val","p_day": "no_val", "P_TIME1": "","P_INSTRUCTOR": "","P_UGR": ""}
+            site = session.post(url, headers=headers, data=data)
+            soup = BeautifulSoup(site.content, "lxml")
+            course = soup.table
+            courseTable = course.table
+            rows = courseTable.find_all('td')
+            results = [i.text for i in rows]
+            if results[10] == "Closed":
+                logging.debug("Class unavailable: "+ results[7])
+            else:
+                opened.append(crn)
+                logging.debug("Class available: " + results[7])
+        if len(opened) > 0:
+            logging.debug("Classes ready to submit")
+            toaster = ToastNotifier()
+            toaster.show_toast("Class Monitor", "Class available: " + results[7], duration=10)
+            notAvail = False
+        time.sleep(180)
+
 
 check_diff('https://usfweb.usf.edu/DSS/StaffScheduleSearch/StaffSearch/Results', ["12345", "23456", "34567"]) # Input the CRNs of interest here
